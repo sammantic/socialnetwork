@@ -1,0 +1,49 @@
+# Use postgres/example user/password credentials
+version: '3.9'
+
+services:
+  db:
+    image: postgres
+    ports:
+      - 5432:5432
+    restart: always
+    networks:
+      - my_fastapi
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=postgres
+
+  app:
+    image: fastapi-app:latest
+    restart: always
+    networks:
+      - my_fastapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  adminer:
+    image: adminer
+    networks:
+      - my_fastapi
+    restart: always
+    ports:
+      - 8080:8080
+
+volumes:
+  postgres_data:
+
+networks:
+  my_fastapi:
