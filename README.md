@@ -4,7 +4,8 @@
 
 1- add individuals
 
-add individuals by using endpoint /v1/individual/
+add individuals by using endpoint /v1/individual/ <br>
+Name | birthday | other details
 
 	1. "Ali"	"2024-11-23"	"string"
 	2. "hassan"	"2024-11-23"	"string"
@@ -13,14 +14,18 @@ add individuals by using endpoint /v1/individual/
 
 2- add individuals
 
-add family by using endpoint /v1/family/
+add family by using endpoint /v1/family/ <br>
+family name
+
   1.	"home"
   2.	"work"
   3.	"sport"
 
 3- create membership
 
-create membership by using endpoint /v1/familymember/
+create membership by using endpoint /v1/familymember/ <br>
+family id | individual id
+ 
   1. 1 1
   2. 1 2
   3. 1 3
@@ -32,10 +37,12 @@ create membership by using endpoint /v1/familymember/
 
 4- create patient /v1/patient/
 creat a patient by using end point /v1/patient/
+family id | individual id
   1. 1 1
 
 5- creat memory
 create a memory by using endpoint /v1/patient/
+family id | individual id | text
   1. 1 1 "Hi all"
   2. 1 2 "Good Morning"
   3. 1 3 "How are you"
