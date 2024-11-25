@@ -1,5 +1,16 @@
 # socialnetwork
 
+## Run application
+1- Build image with command <br>
+docker build -t fastapi-app .
+
+2- run docker compose with command <br>
+docker-compose up
+
+3- open this like in your browser <br>
+http://0.0.0.0:8000/docs
+
+
 ## fill database
 
 1- add individuals
