@@ -36,12 +36,12 @@ family id | individual id
   8. 3 4
 
 4- create patient /v1/patient/
-creat a patient by using end point /v1/patient/
+creat a patient by using end point /v1/patient/ <br>
 family id | individual id
   1. 1 1
 
 5- creat memory
-create a memory by using endpoint /v1/patient/
+create a memory by using endpoint /v1/patient/ <br>
 family id | individual id | text
   1. 1 1 "Hi all"
   2. 1 2 "Good Morning"
