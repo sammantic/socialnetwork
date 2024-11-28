@@ -11,7 +11,11 @@ docker-compose up
 http://0.0.0.0:8000/docs
 
 ## Create the social network database
-connect the Postgres server with username admin and password admin, and the create database called socialnetwork
+The database will be created automatically;
+
+For manual step:
+
+connect the Postgres server with username admin and password admin, and create the database called socialnetwork
 
 ## fill database
 
