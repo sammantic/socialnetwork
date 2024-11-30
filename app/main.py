@@ -5,7 +5,7 @@ from app.api.v1.family_environment import router as family_router
 from app.api.v1.family_membership import router as family_membership
 from app.api.v1.patient import router as patient_router
 from app.api.v1.memory import router as memory_router
-from app.db.database import engine, Base
+from app.db.database import engine, Base, create_database_if_not_exists
 from app.db.models import (
     individual,
     family_environment,
@@ -13,6 +13,9 @@ from app.db.models import (
     family_member,
     memory
 )
+
+# Create the database if it does not exist
+create_database_if_not_exists()
 
 # Init database
 Base.metadata.create_all(bind=engine)
