@@ -1,4 +1,4 @@
-# socialnetwork
+# Patient social network
 
 ## Run application
 1- Build image with command <br>
@@ -17,6 +17,13 @@ For manual step:
 
 connect the Postgres server with username admin and password admin, and create the database called socialnetwork
 
+## Database migration
+- Alembic is already configured with the database.
+- there is a default revision called initial
+```commandline
+# alembic history
+<base> -> 2410d461c13f (head), inital
+```
 ## fill database
 
 1- add individuals
