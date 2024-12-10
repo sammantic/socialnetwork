@@ -1,4 +1,5 @@
 # Patient social network
+the social network consists of 4 entities individual, Patient, environment, and memory.
 
 ## Run application
 1- Build image with command <br>
