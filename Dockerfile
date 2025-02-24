@@ -1,26 +1,37 @@
-FROM python:3.10-slim
+FROM python:3.11-slim AS builder
 
-# Set the working directory in the container
-WORKDIR /socialnetwork
+# Set working directory
+WORKDIR /app
 
-RUN mkdir /socialnetwork/app
-# Copy the requirements file to the container
+# Install system dependencies and create a virtual environment
+RUN apt-get update && apt-get install -y gcc libpq-dev && rm -rf /var/lib/apt/lists/*
 
+# Copy only dependency files first for caching purposes
 COPY app/requirements.txt requirements.txt
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m venv /venv && /venv/bin/pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code to the container
+# Final stage
+FROM python:3.11-slim AS runner
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/venv/bin:$PATH"
+
+# Set working directory
+WORKDIR /app
+
+# Copy the virtual environment from the builder stage
+COPY --from=builder /venv /venv
+
 COPY app/ app/
 COPY migrations/ migrations/
 COPY alembic.ini .
 
-
 # Expose the port FastAPI will run on
 EXPOSE 8000
-
-
 
 # Command to run the FastAPI application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
