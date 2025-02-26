@@ -1,4 +1,4 @@
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
 
 from app.db.models.family_environment import FamilyEnvironment
@@ -56,13 +56,25 @@ def service_create_family(db: Session, family: FamilyEnvironmentCreate):
     :return:
     None or object of a family
     """
-
-    db_family = FamilyEnvironment(name=family.name)
-    db.add(db_family)
-    db.commit()
-    db.refresh(db_family)
-    return db_family
-
+    try:
+        db_family = FamilyEnvironment(name=family.name)
+        db.add(db_family)
+        db.commit()
+        db.refresh(db_family)
+        return db_family
+    except IntegrityError as e:
+        db.rollback()
+        # Check if the IntegrityError is due to a unique constraint violation
+        if 'violates unique constraint' in str(e.orig):
+            return {"error": "A family name is already exists."}
+        else:
+            return {"error": "An integrity error occurred."}
+    except OperationalError as e:
+        db.rollback()
+        return {"error": "A database operational error occurred."}
+    except Exception as e:
+        db.rollback()
+        return {"error": f"An unexpected error occurred: {str(e)}"}
 
 def service_update_family(db: Session, family_id: int, family: FamilyEnvironmentUpdate):
     """
@@ -81,9 +93,19 @@ def service_update_family(db: Session, family_id: int, family: FamilyEnvironment
         db_query.update(family.model_dump())
         db.commit()
         return db_query.first()
-    except IntegrityError:
+    except IntegrityError as e:
         db.rollback()
-
+        # Check if the IntegrityError is due to a unique constraint violation
+        if 'violates unique constraint' in str(e.orig):
+            return {"error": "A family with this name already exists."}
+        else:
+            return {"error": "An integrity error occurred."}
+    except OperationalError as e:
+        db.rollback()
+        return {"error": "A database operational error occurred."}
+    except Exception as e:
+        db.rollback()
+        return {"error": f"An unexpected error occurred: {str(e)}"}
 
 def service_delete_family(db: Session, family_id: int):
     """

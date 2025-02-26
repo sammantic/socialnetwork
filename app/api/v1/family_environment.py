@@ -64,14 +64,13 @@ async def create_family(family_environment_create: FamilyEnvironmentCreate, db: 
     FamilyEnvironmentResponse: pydantic schema of family response
     """
 
-    res = service_get_family_by_name(db=db, name=family_environment_create.name)
-    if res:  # check if family is exits
+    res = service_create_family(db=db, family=family_environment_create)
+    if isinstance(res, dict):  # check if family is exits
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="family already exists",
+            detail=res.get("error", 0),
         )
 
-    res = service_create_family(db=db, family=family_environment_create)
     return res
 
 
@@ -101,13 +100,13 @@ async def update_family(family_id: int, family_update: FamilyEnvironmentUpdate,
         res_update = service_update_family(db=db, family_id=family_id, family=family_update)
 
         # TODO: Decoupling the update errors
-        if res_update:  # fail if the family name already used
+        if isinstance(res_update, dict):  # fail if the family name already used
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=res_update.get('error', 0)
+            )
+        else:
             return res_update
-
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The family name already exists"
-        )
 
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
