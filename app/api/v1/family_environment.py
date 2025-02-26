@@ -94,24 +94,26 @@ async def update_family(family_id: int, family_update: FamilyEnvironmentUpdate,
      FamilyEnvironmentResponse: pydantic schema of family response
     """
 
-    res = service_get_family_by_id(db=db, family_id=family_id)
-    if res:  # check if the family exits
+    # res = service_get_family_by_id(db=db, family_id=family_id)
+    # if res:  # check if the family exits
 
-        res_update = service_update_family(db=db, family_id=family_id, family=family_update)
+    res_update = service_update_family(db=db, family_id=family_id, family=family_update)
 
-        # TODO: Decoupling the update errors
-        if isinstance(res_update, dict):  # fail if the family name already used
+    if isinstance(res_update, dict):  # fail if the family name already used
+        if "not exist" in res_update["error"]:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=res_update.get('error', 0)
+            )
+        else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=res_update.get('error', 0)
             )
-        else:
-            return res_update
+    else:
+        return res_update
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="The family not found"
-    )
+
 
 
 @router.delete('/{family_id}',
