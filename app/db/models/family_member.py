@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from ..database import Base
 
@@ -11,6 +11,10 @@ class FamilyEnvironmentMember(Base):
                                    nullable=False)
     individual_id = Column(Integer, ForeignKey("individuals.individual_id", ondelete="CASCADE"), nullable=False)
     role = Column(String(255), nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint("family_environment_id", "individual_id", name='uq_foreign_keys'),
+    )
 
     # Relationships
     family_environment = relationship("FamilyEnvironment", back_populates="members")
