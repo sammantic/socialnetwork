@@ -100,7 +100,6 @@ def create_family_membership(family_membership: FamilyMemberCreate, db: Session 
     FamilyMemberBasicResponse: pydantic schema of family basic response
     """
 
-
     is_patient = service_get_patient_by_id(db=db, patient_id=family_membership.individual_id)
     count = service_count_families_for_individual(db=db, individual_id=family_membership.individual_id)
 
@@ -114,7 +113,7 @@ def create_family_membership(family_membership: FamilyMemberCreate, db: Session 
         )
 
     res_create = service_create_family_membership(db=db, family_membership=family_membership)
-    print(res_create)
+
     # check values of the membership
     # - family_environment_id is a foreign key
     # - individual_id is a foreign key
@@ -160,6 +159,7 @@ def update_family_membership(membership_id: int, membership: FamilyMemberUpdate,
         is_new_patient = service_search_for_patients(db=db, patient_ids=[membership.individual_id, res.individual_id])
 
         # check if the new individual and the old individual are patients
+        # Handling swapping case too.
         # if it patient it means, it has a family
         # patient has only one family.
 
