@@ -1,4 +1,4 @@
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session, joinedload
 
 from app.db.models.family_member import FamilyEnvironmentMember
@@ -101,8 +101,19 @@ def service_create_family_membership(db: Session, family_membership: FamilyMembe
         db.refresh(db_membership)
         return db_membership
 
-    except IntegrityError:
+    except IntegrityError as e:
         db.rollback()
+        # Check if the IntegrityError is due to a unique constraint violation
+        if 'violates unique constraint' in str(e.orig):
+            return {"error": "A family membership is already exists."}
+        else:
+            return {"error": "An integrity error occurred."}
+    except OperationalError as e:
+        db.rollback()
+        return {"error": "A database operational error occurred."}
+    except Exception as e:
+        db.rollback()
+        return {"error": f"An unexpected error occurred: {str(e)}"}
 
 
 def service_update_family_membership(db: Session, membership_id: int, membership: FamilyMemberUpdate):
@@ -117,21 +128,25 @@ def service_update_family_membership(db: Session, membership_id: int, membership
     None or an object of family membership
     """
 
-    db_check = db.query(FamilyEnvironmentMember).filter(
-        FamilyEnvironmentMember.individual_id == membership.individual_id,
-        FamilyEnvironmentMember.family_environment_id == membership.family_environment_id).first()
-
-    # check if the family membership is exits
-    if not db_check:
-
-        try:
-            db_update = db.query(FamilyEnvironmentMember).filter(
-                FamilyEnvironmentMember.family_environment_member_id == membership_id)
-            db_update.update(membership.model_dump())
-            db.commit()
-            return db_update.first()
-        except IntegrityError:
-            db.rollback()
+    try:
+        db_update = db.query(FamilyEnvironmentMember).filter(
+            FamilyEnvironmentMember.family_environment_member_id == membership_id)
+        db_update.update(membership.model_dump())
+        db.commit()
+        return db_update.first()
+    except IntegrityError as e:
+        db.rollback()
+        # Check if the IntegrityError is due to a unique constraint violation
+        if 'violates unique constraint' in str(e.orig):
+            return {"error": "A family membership already exists."}
+        else:
+            return {"error": "An integrity error occurred."}
+    except OperationalError as e:
+        db.rollback()
+        return {"error": "A database operational error occurred."}
+    except Exception as e:
+        db.rollback()
+        return {"error": f"An unexpected error occurred: {str(e)}"}
 
 
 def service_delete_family_membership(db: Session, membership_id: int):
