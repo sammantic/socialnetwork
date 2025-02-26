@@ -161,10 +161,19 @@ def service_delete_family_membership(db: Session, membership_id: int):
     """
 
     # TODO: handle failure of the deletion
-    db_query = db.query(FamilyEnvironmentMember).filter(
-        FamilyEnvironmentMember.family_environment_member_id == membership_id)
-    db_query.delete()
-    db.commit()
+    try:
+        db_query = db.query(FamilyEnvironmentMember).filter(
+            FamilyEnvironmentMember.family_environment_member_id == membership_id)
+        res_delete = db_query.delete()
+        if res_delete == 0:
+            return False
+        else:
+            db.commit()
+            return True
+    except Exception as e:
+        db.rollback()
+        print(e)
+
 
 
 def service_count_families_for_individual(db: Session, individual_id: int):
