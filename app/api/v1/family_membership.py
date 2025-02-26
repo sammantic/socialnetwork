@@ -100,38 +100,37 @@ def create_family_membership(family_membership: FamilyMemberCreate, db: Session 
     FamilyMemberBasicResponse: pydantic schema of family basic response
     """
 
-    res = service_get_family_membership(db=db, family_membership=family_membership)
-    if not res:  # check if a family membership is not exist
 
-        is_patient = service_get_patient_by_id(db=db, patient_id=family_membership.individual_id)
-        count = service_count_families_for_individual(db=db, individual_id=family_membership.individual_id)
+    is_patient = service_get_patient_by_id(db=db, patient_id=family_membership.individual_id)
+    count = service_count_families_for_individual(db=db, individual_id=family_membership.individual_id)
 
-        # Check if the membership for a patient
-        # - an individual must not be a patient
-        # - number of memberships is zero
-        if is_patient and count >= 1:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="The is patient and already has a family"
-            )
-
-        res_create = service_create_family_membership(db=db, family_membership=family_membership)
-
-        # check values of the membership
-        # - family_environment_id is a foreign key
-        # - individual_id is a foreign key
-        if res_create:
-            return res_create
-
+    # Check if the membership for a patient
+    # - an individual must not be a patient
+    # - number of memberships is zero
+    if is_patient and count >= 1:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Bad values"
+            status_code=status.HTTP_409_CONFLICT,
+            detail="The is patient and already has a family"
         )
 
-    raise HTTPException(
-        status_code=status.HTTP_409_CONFLICT,
-        detail="the membership already exits"
-    )
+    res_create = service_create_family_membership(db=db, family_membership=family_membership)
+    print(res_create)
+    # check values of the membership
+    # - family_environment_id is a foreign key
+    # - individual_id is a foreign key
+    if isinstance(res_create, dict):
+        if "membership" in res_create["error"]:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=res_create.get("error", 0)
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=res_create.get("error", 0)
+            )
+
+    return res_create
 
 
 @router.put('/{membership_id}',
@@ -177,13 +176,14 @@ def update_family_membership(membership_id: int, membership: FamilyMemberUpdate,
         # check if the membership is exits
         # - family_environment_id is a foreign key
         # - individual_id is a foreign key
-        if res_update:
-            return res_update
+        if isinstance(res_update, dict):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=res_update.get("error")
+            )
 
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Bad request, check values"
-        )
+        else:
+            return res_update
 
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
