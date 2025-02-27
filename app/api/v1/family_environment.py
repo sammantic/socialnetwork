@@ -129,10 +129,10 @@ async def delete_family(family_id: int, db: Session = Depends(get_db)):
     {"message": "The individual deleted"}: confirmation message
     """
 
-    res = service_get_family_by_id(db=db, family_id=family_id)
+    # res = service_get_family_by_id(db=db, family_id=family_id)
+    res = service_delete_family(db=db, family_id=family_id)
     if res:  # check if a family is exits
-        service_delete_family(db=db, family_id=family_id)
-        return {"message": "The individual deleted"}
+        return {"message": "The family deleted"}
 
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,

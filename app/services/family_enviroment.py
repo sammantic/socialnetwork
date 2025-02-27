@@ -124,6 +124,16 @@ def service_delete_family(db: Session, family_id: int):
     """
 
     # TODO: handle failure of the deletion
-    db_query = db.query(FamilyEnvironment).filter(FamilyEnvironment.family_environment_id == family_id)
-    db_query.delete()
-    db.commit()
+    try:
+
+        db_query = db.query(FamilyEnvironment).filter(FamilyEnvironment.family_environment_id == family_id)
+        res_delete = db_query.delete()
+        if res_delete == 0:
+            return False
+
+        db.commit()
+        return True
+
+    except Exception as e:
+        db.rollback()
+        print(e)
