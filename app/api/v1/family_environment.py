@@ -114,8 +114,6 @@ async def update_family(family_id: int, family_update: FamilyEnvironmentUpdate,
         return res_update
 
 
-
-
 @router.delete('/{family_id}',
                responses={status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema}},
                status_code=status.HTTP_200_OK,

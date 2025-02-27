@@ -76,6 +76,7 @@ def service_create_family(db: Session, family: FamilyEnvironmentCreate):
         db.rollback()
         return {"error": f"An unexpected error occurred: {str(e)}"}
 
+
 def service_update_family(db: Session, family_id: int, family: FamilyEnvironmentUpdate):
     """
     Update a family
@@ -90,9 +91,12 @@ def service_update_family(db: Session, family_id: int, family: FamilyEnvironment
 
     try:
         db_query = db.query(FamilyEnvironment).filter(FamilyEnvironment.family_environment_id == family_id)
-        db_query.update(family.model_dump())
-        db.commit()
-        return db_query.first()
+        res_update = db_query.update(family.model_dump())
+        if res_update == 0:
+            return {"error": "A family id does not exist."}
+        else:
+            db.commit()
+            return db_query.first()
     except IntegrityError as e:
         db.rollback()
         # Check if the IntegrityError is due to a unique constraint violation
@@ -106,6 +110,7 @@ def service_update_family(db: Session, family_id: int, family: FamilyEnvironment
     except Exception as e:
         db.rollback()
         return {"error": f"An unexpected error occurred: {str(e)}"}
+
 
 def service_delete_family(db: Session, family_id: int):
     """
